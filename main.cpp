@@ -25,17 +25,5 @@ int main(int argc, char** argv) {
     output.close();
     input.close();
 
-    // Open the file again to read from it
-    ifstream ReadFile("example.txt");
-    string line;
-
-    // Read and display the content of the file line by line
-    while (getline(ReadFile, line)) {
-        cout << line << endl;
-    }
-
-    // Close the file
-    ReadFile.close();
-
     return 42;
 }
