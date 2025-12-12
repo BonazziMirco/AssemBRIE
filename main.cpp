@@ -129,10 +129,7 @@ void reader(ifstream& file) {
 
 void writer(int rows, ofstream& file) {
     for (int i = 0; i < rows; ++i) {
-        for (int j = 0; j < rows; ++j) {
-            file << matrix[i][j] << " ";
-        }
-        file << endl;
+        file << matrix[i][0] << " " << matrix[i][1] << " " << matrix[i][2] << " " << matrix[i][3] << endl;
     }
 }
 
