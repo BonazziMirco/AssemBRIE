@@ -5,7 +5,7 @@
       "name": "C/C++ Runner: Debug Session",
       "type": "cppdbg",
       "request": "launch",
-      "args": [],
+      "args": ["./ricostruzione-albero/input/input0.txt"],
       "stopAtEntry": false,
       "externalConsole": true,
       "cwd": "c:/Users/MIRCO/Desktop/AssemBRIE/AssemBRIE",

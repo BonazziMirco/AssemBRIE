@@ -1,6 +1,7 @@
-using namespace std;
 #include <iostream>
 #include <fstream>
+
+using namespace std;
 
 int** matrix;
 int* inOrder;
@@ -48,7 +49,7 @@ int processor_postOrder(int start, int end, int counter = 0) {
     // split both arrays into left and right subtrees,
     // recursively process left and right subtrees
 
-    if(end != 1) {
+    if(start >= end) {
         return -1;
     }
     
@@ -88,6 +89,7 @@ void processor(bool isPreOrder) {
     matrix[val][0] = (leftChild!= -1) + (rightChild != -1);
     matrix[val][1] = leftChild;
     matrix[val][2] = rightChild;
+    return;
 }
 
 /*
@@ -116,20 +118,20 @@ void reader(ifstream& file) {
             array = notInOrder;
             isPreOrder = (order < 0);
         }
-        for (int i = 0; i <= n; ++i) {
-            for (int j = 0; j < 3; ++j) {
-                file >> array[i];
-            }
+        for (int i = 0; i < n; ++i) {
+            file >> array[i];
         }
         repeat = !repeat;
     } while(repeat);
+    
+    cout << "coocadodle" << endl;
 
     processor(isPreOrder);
 }
 
 void writer(int rows, ofstream& file) {
     for (int i = 0; i < rows; ++i) {
-        file << matrix[i][0] << " " << matrix[i][1] << " " << matrix[i][2] << " " << matrix[i][3] << endl;
+        file << matrix[i][0] << " " << matrix[i][1] << " " << matrix[i][2] << endl;
     }
 }
 
@@ -139,16 +141,22 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    ifstream input("input.txt");
+    ifstream input(argv[1]);
 
     if(!input.is_open()) {
-        cout << "Error opening input file!" << endl;
+        cout << "Error opening input file: " << argv[1] << endl;
         return 1;
     }
+    
+    cout << "cognac" << endl;
 
     reader(input); // Placeholder call to reader function
+    
+    cout << "bissolo";
 
     input.close();
+    
+    cout << "criptitatachuchu";
 
     /*
      section switch
