@@ -135,6 +135,18 @@ void writer(int rows, ofstream& file) {
     }
 }
 
+//deallocate arrays and matrix
+void cleanup() {
+    if(matrix) {
+        for(int i = 0; i < n; ++i) {
+            delete[] matrix[i];
+        }
+        delete[] matrix;
+    }
+    delete[] inOrder;
+    delete[] notInOrder;
+}
+
 int main(int argc, char** argv) {
     if (argc < 2) {
         cout << "Usage: " << argv[0] << " <filename>" << endl;
@@ -172,6 +184,8 @@ int main(int argc, char** argv) {
     writer(0, output); // Placeholder call to writer function
 
     output.close();
+
+    cleanup();
 
     return 42;
 }
