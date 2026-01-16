@@ -5,133 +5,123 @@ using namespace std;
 
 int** matrix;
 int* inOrder;
-int* notInOrder;
+int* otherOrder;  // Can be pre-order or post-order
 int n;
+int preIndex = 0;      // For pre-order traversal
+int postIndex = 0;     // For post-order traversal
 
-int findInOrderIndex(int value, int n) {
+int findInOrderIndex(int value) {
     for(int i = 0; i < n; i++) {
         if(inOrder[i] == value) {
             return i;
         }
     }
-    return -1; // Value not found
+    return -1;
 }
 
-int processor_preOrder(int start, int end, int counter = 0) {
-    // take root from notinorder, find it in inorder,
-    // split both arrays into left and right subtrees,
-    // recursively process left and right subtrees
-
-    if(start >= end) {
+// Recursive function to build tree from PRE-order and in-order
+int buildTreeFromPreOrder(int inStart, int inEnd) {
+    if (inStart > inEnd || preIndex >= n) {
         return -1;
     }
     
-    int val;
-    int index;
-    int leftChild, rightChild;
-
-    val = notInOrder[counter];
-    counter++;
-    index = findInOrderIndex(val, n);
-    leftChild = processor_preOrder(start, index, counter);
-    rightChild = processor_preOrder(index + 1, end, counter);
-    matrix[val][0] = (leftChild!= -1) + (rightChild != -1);
-    matrix[val][1] = leftChild;
-    matrix[val][2] = rightChild;
+    // Current root from pre-order (first element is root)
+    int rootVal = otherOrder[preIndex++];
+    int inIndex = findInOrderIndex(rootVal);
     
-
-    return val;
-
+    // Recursively build left and right subtrees
+    int leftChild = buildTreeFromPreOrder(inStart, inIndex - 1);
+    int rightChild = buildTreeFromPreOrder(inIndex + 1, inEnd);
+    
+    // Store children information in matrix
+    matrix[rootVal][0] = (leftChild != -1) + (rightChild != -1);
+    matrix[rootVal][1] = leftChild;
+    matrix[rootVal][2] = rightChild;
+    
+    return rootVal;
 }
 
-int processor_postOrder(int start, int end, int counter = 0) {
-    // take root from notinorder, find it in inorder,
-    // split both arrays into left and right subtrees,
-    // recursively process left and right subtrees
-
-    if(start >= end) {
+// Recursive function to build tree from POST-order and in-order
+int buildTreeFromPostOrder(int inStart, int inEnd) {
+    if (inStart > inEnd || postIndex < 0) {
         return -1;
     }
     
-    int val;
-    int index;
-    int leftChild, rightChild;
-
-    val = notInOrder[counter];
-    counter++;
-    index = findInOrderIndex(val, n);
-    leftChild = processor_postOrder(start, index, counter);
-    rightChild = processor_postOrder(index + 1, end, counter);
-    matrix[val][0] = (leftChild!= -1) + (rightChild != -1);
-    matrix[val][1] = leftChild;
-    matrix[val][2] = rightChild;
-
-    return val;
-
+    // Current root from post-order (last element is root, process in reverse)
+    int rootVal = otherOrder[postIndex--];
+    int inIndex = findInOrderIndex(rootVal);
+    
+    // In post-order: right subtree comes before left subtree when reading backwards
+    int rightChild = buildTreeFromPostOrder(inIndex + 1, inEnd);
+    int leftChild = buildTreeFromPostOrder(inStart, inIndex - 1);
+    
+    // Store children information in matrix
+    matrix[rootVal][0] = (leftChild != -1) + (rightChild != -1);
+    matrix[rootVal][1] = leftChild;
+    matrix[rootVal][2] = rightChild;
+    
+    return rootVal;
 }
 
-void processor(bool isPreOrder) {
-    int val;
-    int index;
-    int leftChild, rightChild;
-    if(isPreOrder) {
-        val = notInOrder[0];
-        index = findInOrderIndex(val, n);
-        leftChild = processor_preOrder(0, index);
-        rightChild = processor_preOrder(index + 1, n);
-    } else {
-        val = notInOrder[n - 1];
-        index = findInOrderIndex(val, n);
-        leftChild = processor_postOrder(0, index);
-        rightChild = processor_postOrder(index + 1, n);
-    }
-
-    matrix[val][0] = (leftChild!= -1) + (rightChild != -1);
-    matrix[val][1] = leftChild;
-    matrix[val][2] = rightChild;
-    return;
-}
-
-/*
-    Allocates arrays and matrix.
-    Reads data from the input file and populates the arrays.
-*/
 void reader(ifstream& file) {
     file >> n;
+    
+    // Allocate matrix
     matrix = new int*[n];
-    for (int i = 0; i < n; ++i)
-    matrix[i] = new int[3];
-
+    for (int i = 0; i < n; ++i) {
+        matrix[i] = new int[3];
+        // Initialize with -1 (no child)
+        matrix[i][0] = 0;
+        matrix[i][1] = -1;
+        matrix[i][2] = -1;
+    }
+    
     inOrder = new int[n];
-    notInOrder = new int[n];
-    bool isPreOrder = false;
-
+    otherOrder = new int[n];
+    
     int order;
-    int* array;
     bool repeat = false;
-
-    file >> order;
-    do{
+    bool isPreOrder = false;
+    
+    do {
+        file >> order;
+        
         if (order == 0) {
-            array = inOrder;
-        } else {
-            array = notInOrder;
-            isPreOrder = (order < 0);
-        }
-        for (int i = 0; i < n; ++i) {
-            file >> array[i];
+            // In-order traversal
+            for (int i = 0; i < n; ++i) {
+                file >> inOrder[i];
+            }
+        } else if (order == 1) {
+            // Post-order traversal
+            isPreOrder = false;
+            for (int i = 0; i < n; ++i) {
+                file >> otherOrder[i];
+            }
+        } else if (order == -1) {
+            // Pre-order traversal
+            isPreOrder = true;
+            for (int i = 0; i < n; ++i) {
+                file >> otherOrder[i];
+            }
         }
         repeat = !repeat;
     } while(repeat);
     
-    cout << "coocadodle" << endl;
-
-    processor(isPreOrder);
+    // Process based on order type
+    if (isPreOrder) {
+        // Pre-order case: start from beginning
+        preIndex = 0;
+        int root = buildTreeFromPreOrder(0, n - 1);
+    } else {
+        // Post-order case: start from end
+        postIndex = n - 1;
+        int root = buildTreeFromPostOrder(0, n - 1);
+    }
 }
 
 void writer(int rows, ofstream& file) {
     for (int i = 0; i < rows; ++i) {
-        file << matrix[i][0] << " " << matrix[i][1] << " " << matrix[i][2] << endl;
+        file << i << " " << matrix[i][0] << " " << matrix[i][1] << " " << matrix[i][2] << endl;
     }
 }
 
@@ -144,7 +134,7 @@ void cleanup() {
         delete[] matrix;
     }
     delete[] inOrder;
-    delete[] notInOrder;
+    delete[] otherOrder;
 }
 
 int main(int argc, char** argv) {
@@ -160,32 +150,19 @@ int main(int argc, char** argv) {
         return 1;
     }
     
-    cout << "cognac" << endl;
-
-    reader(input); // Placeholder call to reader function
-    
-    cout << "bissolo";
-
+    reader(input);
     input.close();
     
-    cout << "criptitatachuchu";
-
-    /*
-     section switch
-    */
-
     ofstream output("output.txt");
-
     if(!output.is_open()) {
         cout << "Error opening output file!" << endl;
         return 1;
     }
 
-    writer(0, output); // Placeholder call to writer function
-
+    writer(n, output);
     output.close();
 
     cleanup();
 
-    return 42;
+    return 0;
 }
